@@ -82,7 +82,9 @@ class ClCamera extends Component {
             alert('Error getting access to your camera');
         });
      } else {
-         this.webcam = undefined; 
+      console.log(this.webcam.webcamElement.srcObject.getVideoTracks().forEach(track => track.stop())) 
+
+      
      }
 
  
