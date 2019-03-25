@@ -12,20 +12,15 @@ class ClCamera extends Component {
     this.state = {
       capturedImage: null,
       captured: false,
-      uploading: false
+      uploading: false,
+      webcamStatus: true
     }
   }
 
   componentDidMount() {
     // initialize the camera
     this.canvasElement = document.createElement('canvas');
-    this.webcam = new Webcam(
-        document.getElementById('webcam'),
-        this.canvasElement
-    );
-    this.webcam.setup().catch(() => {
-        alert('Error getting access to your camera');
-    });
+
   }
 
   componentDidUpdate(prevProps) {
@@ -45,10 +40,17 @@ class ClCamera extends Component {
             <div>
                 <button className="deleteButton" onClick={this.discardImage} > Delete Photo </button>
                 <button className="captureButton" onClick={this.uploadImage} > Upload Photo </button>
+                <button className="toggleWebCamButton" > Toggle WebCam </button>
             </div> :
             <button className="captureButton" onClick={this.captureImage} > Take Picture </button>
 
-        const uploading = this.state.uploading ?
+        const toggleWebCam = this.state.webcamStatus ?
+
+        <button className="toggleWebcam" onClick={this.webcamToggle} > WebCam On </button>
+        :
+        <button className="toggleWebcam" onClick={this.webcamToggle} > WebCam Off </button>; 
+
+        const uploading = this.state.webcam ?
             <div><p> Uploading Image, please wait ... </p></div>
             :
             <span />
@@ -61,9 +63,29 @@ class ClCamera extends Component {
                 <div className="imageCanvas">
                     {imageDisplay}
                 </div>
-                {buttons}
+                {buttons} {toggleWebCam}
             </div>
         )
+    }
+
+    webcamToggle = () =>{
+     this.setState({
+         webcamStatus: !this.state.webcamStatus
+     })
+
+     if(this.state.webcamStatus){
+        this.webcam = new Webcam(
+            document.getElementById('webcam'),
+            this.canvasElement
+        );
+        this.webcam.setup().catch(() => {
+            alert('Error getting access to your camera');
+        });
+     } else {
+         this.webcam = undefined; 
+     }
+
+ 
     }
 
     captureImage = async () => {
@@ -98,7 +120,7 @@ class ClCamera extends Component {
                 `https://api.cloudinary.com/v1_1/dvlhbwczv/image/upload`,
                 {
                     file: this.state.capturedImage,
-                    upload_preset: 'CLOUDINARY_CLOUD_PRESET'
+                    upload_preset: 'pwa_cloudinary'
                 }
             ).then((data) => this.checkUploadStatus(data)).catch((error) => {
                 alert('Sorry, we encountered an error uploading your image');
@@ -143,7 +165,7 @@ class ClCamera extends Component {
                     `https://api.cloudinary.com/v1_1/dvlhbwczv/image/upload`,
                     {
                         file: images[i].val,
-                        upload_preset: 'CLOUDINARY_CLOUD_PRESET'
+                        upload_preset: 'pwa_cloudinary'
                     }
 
                 ).then(
